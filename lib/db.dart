@@ -57,14 +57,17 @@ class Db {
       _fs.collection('groups').doc(groupId).collection('live').snapshots();
 
   /// Upsert own live pin. Firestore queues this automatically while offline.
-  Future<void> updateLive(String groupId, Map<String, dynamic> data) =>
-      _fs
-          .collection('groups')
-          .doc(groupId)
-          .collection('live')
-          .doc(uid)
-          .set({...data, 'updatedAt': FieldValue.serverTimestamp()},
-              SetOptions(merge: true));
+  Future<void> updateLive(String groupId, Map<String, dynamic> data) async {
+    final profile = await _fs.collection('users').doc(uid).get();
+    final name = profile.data()?['displayName'];
+    await _fs
+        .collection('groups')
+        .doc(groupId)
+        .collection('live')
+        .doc(uid)
+        .set({...data, 'name': name, 'updatedAt': FieldValue.serverTimestamp()},
+            SetOptions(merge: true));
+  }
 
   Future<void> removeLive(String groupId) =>
       _fs.collection('groups').doc(groupId).collection('live').doc(uid).delete();
@@ -126,7 +129,14 @@ class Db {
           .snapshots()
           .map((snaps) => snaps.docs
               .map((d) => {...d.data(), 'uid': d.id})
-              .toList());
+              .toList())
+          .asyncMap((rows) async {
+            await Future.wait(rows.map((r) async {
+              final u = await _fs.collection('users').doc(r['uid']).get();
+              r['name'] = u.data()?['displayName'];
+            }));
+            return rows;
+          });
 
   Stream<QuerySnapshot<Object?>> sessionsFor(String groupId) => _fs
       .collection('sessions')

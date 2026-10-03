@@ -15,6 +15,7 @@ class JoinScreen extends StatefulWidget {
 
 class _JoinScreenState extends State<JoinScreen> {
   final _name = TextEditingController();
+  final _groupName = TextEditingController();
   final _pin = List.generate(4, (_) => TextEditingController());
   bool _busy = false;
   bool _created = false;
@@ -134,6 +135,21 @@ class _JoinScreenState extends State<JoinScreen> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: 16),
+                  Text('GROUP NAME (when creating)',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          letterSpacing: 1.6, color: cs.onSurfaceVariant)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _groupName,
+                    decoration: InputDecoration(
+                      hintText: 'Ridge Runners',
+                      filled: true,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
@@ -149,9 +165,12 @@ class _JoinScreenState extends State<JoinScreen> {
                               final name = _name.text.trim().isEmpty
                                   ? 'Driver'
                                   : _name.text.trim();
+                              final group = _groupName.text.trim().isEmpty
+                                  ? '$name\'s group'
+                                  : _groupName.text.trim();
                               String? code;
                               await _submit(() async {
-                                code = await context.read<Db>().createGroup(name);
+                                code = await context.read<Db>().createGroup(group);
                               });
                               if (code != null && mounted) {
                                 setState(() {

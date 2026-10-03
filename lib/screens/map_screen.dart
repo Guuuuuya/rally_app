@@ -92,7 +92,7 @@ class _MapScreenState extends State<MapScreen> {
           geometry: Point(coordinates: Position(lng, lat)),
           iconImage: 'marker-11',
           iconColor: stale ? 0xFF888888 : 0xFFFF5722,
-          textField: d.id,
+          textField: (data['name'] as String?) ?? d.id,
           textColor: 0xFFFFFFFF,
           textSize: 12,
         ),

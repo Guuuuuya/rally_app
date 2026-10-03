@@ -45,7 +45,7 @@ class LeaderboardScreen extends StatelessWidget {
               };
               return ListTile(
                 leading: Text(medal),
-                title: Text(r['uid'] as String),
+                title: Text((r['name'] as String?) ?? (r['uid'] as String)),
                 subtitle: Text(
                   'avg ${(r['avgSpeedKmh'] as num).toStringAsFixed(1)} km/h · '
                   'top ${(r['topSpeedKmh'] as num).toStringAsFixed(1)} km/h',
