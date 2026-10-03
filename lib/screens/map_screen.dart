@@ -22,6 +22,8 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   MapboxMap? _map;
   PointAnnotationManager? _pins;
+  PointAnnotationManager? _mePins;
+  PointAnnotation? _mePin;
   StreamSubscription<QuerySnapshot<Object?>>? _pinSub;
   StreamSubscription<geo.Position>? _posSub;
   geo.Position? _me;
@@ -51,22 +53,42 @@ class _MapScreenState extends State<MapScreen> {
         _centerOnMe(pos);
       }
       await tracker.onPosition(pos);
+      await _updateMePin(pos);
     });
   }
 
   void _onMapCreated(MapboxMap map) async {
     _map = map;
     _pins = await map.annotations.createPointAnnotationManager();
+    _mePins = await map.annotations.createPointAnnotationManager();
     _pinSub = context.read<Db>().livePins(widget.groupId).listen((snaps) {
       _renderPins(snaps.docs);
     });
+  }
+
+  Future<void> _updateMePin(geo.Position pos) async {
+    if (_mePins == null) return;
+    final geom = Point(coordinates: Position(pos.longitude, pos.latitude));
+    if (_mePin == null) {
+      _mePin = await _mePins!.create(PointAnnotationOptions(
+        geometry: geom,
+        iconImage: 'marker-15',
+        iconColor: 0xFF1E88E5,
+        textField: 'YOU',
+        textColor: 0xFFFFFFFF,
+        textSize: 12,
+      ));
+    } else {
+      _mePin!.geometry = geom;
+      await _mePins!.update(_mePin!);
+    }
   }
 
   Future<void> _centerOnMe(geo.Position pos) async {
     await _map?.flyTo(
       CameraOptions(
         center: Point(coordinates: Position(pos.longitude, pos.latitude)),
-        zoom: 14,
+        zoom: 16,
       ),
       MapAnimationOptions(duration: 800),
     );
