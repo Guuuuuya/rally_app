@@ -1,13 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'db.dart';
-import 'screens/home_screen.dart';
 import 'screens/join_screen.dart';
+import 'screens/shell_screen.dart';
+import 'theme.dart';
 import 'tracker.dart';
 import 'updater.dart';
 
@@ -27,6 +29,7 @@ Future<void> main() async {
       providers: [
         Provider<Db>.value(value: db),
         ChangeNotifierProvider<Tracker>.value(value: tracker),
+        ChangeNotifierProvider<ThemeNotifier>(create: (_) => ThemeNotifier()),
       ],
       child: const RallyApp(),
     ),
@@ -53,25 +56,24 @@ class _RallyAppState extends State<RallyApp> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context) {
+    final theme = context.watch<ThemeNotifier>();
+    return MaterialApp(
         navigatorKey: _navKey,
         title: 'RallyTrack',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepOrange,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-          cardTheme: const CardThemeData(
-            elevation: 0,
-            color: Color(0xFF1E1E22),
-          ),
-          appBarTheme: const AppBarTheme(centerTitle: false),
+        theme: AppTheme.light().copyWith(
+          textTheme: GoogleFonts.manropeTextTheme(AppTheme.light().textTheme),
         ),
+        darkTheme: AppTheme.dark().copyWith(
+          textTheme: GoogleFonts.manropeTextTheme(AppTheme.dark().textTheme),
+        ),
+        themeMode: theme.isLight ? ThemeMode.light : ThemeMode.dark,
         home: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snap) =>
-              snap.hasData ? const HomeScreen() : const JoinScreen(),
+              snap.hasData ? const ShellScreen() : const JoinScreen(),
         ),
       );
+  }
 }
+
