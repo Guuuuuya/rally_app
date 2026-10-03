@@ -45,7 +45,11 @@ class _MapScreenState extends State<MapScreen> {
     // Watch own GPS -> tracker + live pin
     final tracker = context.read<Tracker>();
     _posSub = app_locator.Locator.positions().listen((pos) async {
+      final firstFix = _me == null;
       setState(() => _me = pos);
+      if (firstFix && _map != null) {
+        _centerOnMe(pos);
+      }
       await tracker.onPosition(pos);
     });
   }
@@ -53,18 +57,19 @@ class _MapScreenState extends State<MapScreen> {
   void _onMapCreated(MapboxMap map) async {
     _map = map;
     _pins = await map.annotations.createPointAnnotationManager();
-    await map.flyTo(
+    _pinSub = context.read<Db>().livePins(widget.groupId).listen((snaps) {
+      _renderPins(snaps.docs);
+    });
+  }
+
+  Future<void> _centerOnMe(geo.Position pos) async {
+    await _map?.flyTo(
       CameraOptions(
-        center: Point(
-          coordinates: Position(_me?.longitude ?? 0, _me?.latitude ?? 0),
-        ),
+        center: Point(coordinates: Position(pos.longitude, pos.latitude)),
         zoom: 14,
       ),
       MapAnimationOptions(duration: 800),
     );
-    _pinSub = context.read<Db>().livePins(widget.groupId).listen((snaps) {
-      _renderPins(snaps.docs);
-    });
   }
 
   Future<void> _renderPins(List<QueryDocumentSnapshot<Object?>> docs) async {
@@ -131,6 +136,16 @@ class _MapScreenState extends State<MapScreen> {
             styleUri: MapboxStyles.OUTDOORS,
             textureView: true,
           ),
+          if (_me != null)
+            Positioned(
+              right: 12,
+              bottom: 96,
+              child: FloatingActionButton.small(
+                heroTag: 'recenter',
+                onPressed: () => _centerOnMe(_me!),
+                child: const Icon(Icons.navigation),
+              ),
+            ),
           if (_me != null)
             Positioned(
               top: 12,
