@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "rallytrack-app-140680870",
+          "appId": "1:857066341555:android:a7ff59f99370ba902c1cc6",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "rallytrack-app-140680870",
+          "configurations": {
+            "android": "1:857066341555:android:a7ff59f99370ba902c1cc6",
+            "ios": "1:857066341555:ios:76c4ee555ab5b1f52c1cc6"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

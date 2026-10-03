@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "857066341555",
+    "project_id": "rallytrack-app-140680870",
+    "storage_bucket": "rallytrack-app-140680870.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:857066341555:android:a7ff59f99370ba902c1cc6",
+        "android_client_info": {
+          "package_name": "com.rallytrack.rally_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPlAF7TxT5EldKwzp6KBUPCeKCE9PpyPQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
