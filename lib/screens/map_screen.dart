@@ -61,6 +61,10 @@ class _MapScreenState extends State<MapScreen> {
     _map = map;
     _pins = await map.annotations.createPointAnnotationManager();
     _mePins = await map.annotations.createPointAnnotationManager();
+    if (_me != null) {
+      await _centerOnMe(_me!);
+      await _updateMePin(_me!);
+    }
     _pinSub = context.read<Db>().livePins(widget.groupId).listen((snaps) {
       _renderPins(snaps.docs);
     });
