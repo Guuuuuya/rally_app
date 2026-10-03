@@ -52,4 +52,4 @@ android/local.properties
 android/key.properties
 *.jks
 .dart_tool/
-public/app.apk
+public/app.bin

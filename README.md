@@ -73,10 +73,10 @@ Release a new version:
 
 ```powershell
 # bump `version` in pubspec.yaml first
-flutter build apk --release
-copy build\app\outputs\flutter-apk\app-release.apk public\app.apk
+flutter build apk --release --dart-define=MAPBOX_TOKEN=pk.YOUR_TOKEN
+copy build\app\outputs\flutter-apk\app-release.apk public\app.bin   # Spark plan blocks .apk hosting
 firebase deploy --only hosting
-# then update the `config/app` Firestore doc (Firebase console or firebase CLI)
+# then set `config/app`.apkUrl to https://<project>.web.app/app.bin, bump latestVersion
 ```
 
 ## Notes
