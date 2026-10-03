@@ -15,8 +15,22 @@ class LeaderboardScreen extends StatelessWidget {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: context.watch<Db>().sessionBoard(sessionId),
         builder: (context, snap) {
-          if (!snap.hasData || snap.data!.isEmpty) {
+          if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
+            return Center(child: Text('Error: ${snap.error}'));
+          }
+          if (!snap.hasData || snap.data!.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Text(
+                  'No stage data yet. Start a stage and finish it to see the leaderboard.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
           }
           final rows = snap.data!;
           return ListView.builder(
