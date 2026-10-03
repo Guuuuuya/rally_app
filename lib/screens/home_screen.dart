@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../db.dart';
 import '../theme.dart';
+import '../updater.dart';
 import 'map_screen.dart';
 
 
@@ -11,6 +13,75 @@ import 'map_screen.dart';
 /// stat grid, stage CTA, recent drives.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _showProfileMenu(BuildContext context, String currentName) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Edit profile'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final ctrl = TextEditingController(text: currentName);
+                final name = await showDialog<String>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Display name'),
+                    content: TextField(controller: ctrl, autofocus: true),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () =>
+                            Navigator.pop(context, ctrl.text.trim()),
+                        child: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                );
+                if (name != null && name.isNotEmpty && context.mounted) {
+                  await context.read<Db>().setProfile(name);
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Sign out / reset'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await FirebaseAuth.instance.signOut();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('About / version'),
+              onTap: () {
+                Navigator.pop(ctx);
+                showAboutDialog(
+                  context: context,
+                  applicationName: 'RallyTrack',
+                  applicationVersion: '0.1.0',
+                  children: [
+                    const Text('Free-tier rally telemetry.'),
+                    TextButton(
+                      onPressed: () => Updater.check(context),
+                      child: const Text('Check for update'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +134,19 @@ class HomeScreen extends StatelessWidget {
                           .take(2)
                           .map((w) => w[0].toUpperCase())
                           .join();
-                      return CircleAvatar(
-                        radius: 17,
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary,
-                        child: Text(initials,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13)),
+                      return InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => _showProfileMenu(context, name),
+                        child: CircleAvatar(
+                          radius: 17,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          child: Text(initials,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13)),
+                        ),
                       );
                     },
                   ),

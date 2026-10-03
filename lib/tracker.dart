@@ -55,10 +55,29 @@ class Tracker extends ChangeNotifier {
     _connSub = Connectivity().onConnectivityChanged.listen((_) => flush());
   }
 
-  Future<void> start(String groupId) async {
+  int _countdown = 0;
+  int get countdown => _countdown;
+
+  Future<void> start(String groupId,
+      {String? name,
+      String? type,
+      int countdownSec = 0,
+      double? startLat,
+      double? startLng}) async {
     _groupId = groupId;
-    _sessionId = await db.startSession(groupId);
-    _watch.start();
+    _sessionId = await db.startSession(groupId,
+        name: name, type: type, countdownSec: countdownSec,
+        startLat: startLat, startLng: startLng);
+    _countdown = countdownSec;
+    notifyListeners();
+    for (var i = countdownSec; i > 0; i--) {
+      await Future.delayed(const Duration(seconds: 1));
+      _countdown = i - 1;
+      notifyListeners();
+    }
+    _watch
+      ..reset()
+      ..start();
     _running = true;
     notifyListeners();
     _flushTimer = Timer.periodic(const Duration(seconds: 30), (_) => flush());
@@ -70,7 +89,8 @@ class Tracker extends ChangeNotifier {
     _running = false;
     _flushTimer?.cancel();
     await flush();
-    await db.endSession(_sessionId!);
+    await db.endSession(_sessionId!,
+        endLat: _lastPos?.latitude, endLng: _lastPos?.longitude);
     notifyListeners();
   }
 

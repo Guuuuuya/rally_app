@@ -10,6 +10,7 @@ import '../db.dart';
 import '../locator.dart' as app_locator;
 import '../tracker.dart';
 import 'leaderboard_screen.dart';
+import 'stage_setup_screen.dart';
 
 class MapScreen extends StatefulWidget {
   final String groupId;
@@ -76,8 +77,9 @@ class _MapScreenState extends State<MapScreen> {
     if (_mePin == null) {
       _mePin = await _mePins!.create(PointAnnotationOptions(
         geometry: geom,
-        iconImage: 'marker-15',
+        iconImage: 'marker-11',
         iconColor: 0xFF1E88E5,
+        iconSize: 1.8,
         textField: 'YOU',
         textColor: 0xFFFFFFFF,
         textSize: 12,
@@ -172,6 +174,13 @@ class _MapScreenState extends State<MapScreen> {
                 child: const Icon(Icons.navigation),
               ),
             ),
+          if (tracker.countdown > 0)
+            Center(
+              child: Text(
+                '${tracker.countdown}',
+                style: const TextStyle(fontSize: 96, fontWeight: FontWeight.w900, color: Colors.white),
+              ),
+            ),
           if (_me != null)
             Positioned(
               top: 12,
@@ -208,7 +217,12 @@ class _MapScreenState extends State<MapScreen> {
           if (tracker.running) {
             await tracker.stop();
           } else {
-            await tracker.start(widget.groupId);
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StageSetupScreen(groupId: widget.groupId),
+              ),
+            );
           }
         },
       ),

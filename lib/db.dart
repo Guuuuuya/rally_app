@@ -72,13 +72,23 @@ class Db {
   Future<void> removeLive(String groupId) =>
       _fs.collection('groups').doc(groupId).collection('live').doc(uid).delete();
 
-  Future<String> startSession(String groupId) async {
+  Future<String> startSession(String groupId,
+      {String? name,
+      String? type,
+      int countdownSec = 0,
+      double? startLat,
+      double? startLng}) async {
     final doc = _fs.collection('sessions').doc();
     await doc.set({
       'groupId': groupId,
       'startedAt': FieldValue.serverTimestamp(),
       'endedAt': null,
       'status': 'live',
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      'countdownSec': countdownSec,
+      if (startLat != null) 'startLat': startLat,
+      if (startLng != null) 'startLng': startLng,
     });
     return doc.id;
   }
@@ -113,10 +123,12 @@ class Db {
     await batch.commit();
   }
 
-  Future<void> endSession(String sessionId) =>
+  Future<void> endSession(String sessionId, {double? endLat, double? endLng}) =>
       _fs.collection('sessions').doc(sessionId).update({
         'endedAt': FieldValue.serverTimestamp(),
         'status': 'done',
+        if (endLat != null) 'endLat': endLat,
+        if (endLng != null) 'endLng': endLng,
       });
 
   /// Leaderboard: top distance, top speed, best avg pace for a session.
